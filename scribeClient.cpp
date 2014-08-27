@@ -28,12 +28,24 @@ using namespace scribe::thrift;
 
 int main(){
 
-  // Endpoint is current machine ip and port and service_name
+  /*
+   * Endpoint is current machine ip and port and service_name
+   * include (int32_t)ip, (int)port, (string)service_name
+   */
   Endpoint endpoint;
   endpoint.ipv4 = (int32_t)ipv4_to_long("127.0.0.1");
   endpoint.port = 80;
   endpoint.service_name = "www";
 
+  /*
+   * Annotation is some event took place, either one by the framework or by the user
+   * event included four values:
+   *              zipkinCoreConstants().CLIENT_SEND
+   *              zipkinCoreConstants().CLIENT_RECV
+   *              zipkinCoreConstants().SERVER_RECV
+   *              zipkinCoreConstants().SERVER_SEND
+   * (long) timestamp, (Endpoint) host
+   */
   Annotation annotation_cs;
   annotation_cs.timestamp = (long)timestamp();
   annotation_cs.value = zipkinCoreConstants().CLIENT_SEND;
@@ -44,6 +56,15 @@ int main(){
   annotation_cr.value = zipkinCoreConstants().CLIENT_RECV;
   annotation_cr.host = endpoint;
 
+  /*
+   * Span is one RPC call
+   * trace_id is global unique id
+   *     uniq_id() is a function to generate uuid in formatters.h
+   * name is RPC name
+   * id is current machine unique id
+   * annotations is array<Annotation>
+   * binary_annotations is array<binary_annotations>
+   */
   Span span;
   span.trace_id = uniq_id();
   span.name = "test";
@@ -57,26 +78,39 @@ int main(){
   span.annotations = annotations;
   //span.binary_annotations = {};
  
-  // serialize span to binary
+  /*
+   * serialize span to binary
+   *
+   */
   boost::shared_ptr<TMemoryBuffer> trans(new TMemoryBuffer());
   boost::shared_ptr<TBinaryProtocol> proto(new TBinaryProtocol(trans));
   span.write(proto.get());
   string s;
   s = trans->getBufferAsString();
-  cout << s << endl;
+  cout << "binary string: " <<s << endl;
 
+  /*
+   * encode binary string to base64 string
+   */
   std::string encoded;
   encoded = base64_encode(reinterpret_cast<const unsigned char*>(s.c_str()), s.length());
-  std::cout << "encoded: " << encoded << std::endl;
+  cout << "encoded: " << encoded << endl;
 
 
+  /*
+   * Open socket, connect to zipkin server
+   * Use BinaryProtocol to send data
+   */
   boost::shared_ptr<TSocket> socket(new TSocket("127.0.0.1", 9410));
   boost::shared_ptr<TFramedTransport> transport(new TFramedTransport(socket));
-  //boost::shared_ptr<TTransport> transport(new TBufferedTransport(socket));
   boost::shared_ptr<TProtocol> protocol(new TBinaryProtocol(transport));
 
+  /*
+   * Use scribe client to send the trace span to zipkin
+   */
+  boost::shared_ptr<scribeClient> client(new scribeClient(protocol));
+
   try {
-    scribeClient client(protocol);
     string category = "zipkin";
     transport->open();
     LogEntry le;
@@ -85,7 +119,7 @@ int main(){
 
     std::vector<LogEntry> messages;
     messages.push_back(le);
-    client.Log(messages);
+    client->Log(messages);
     transport->close();
   }catch(TException &tx){
     printf("ERROR: %s/n",tx.what());
