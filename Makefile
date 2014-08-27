@@ -1,5 +1,10 @@
+OS=$(shell uname -s)
 CC=g++
-CXXFLAGS= -std=c++11
+ifeq ($(OS), Darwin)
+	CXXFLAGS= -std=c++11
+else
+	CXXFLAGS=
+endif
 LIBS= -lthrift
 INCLUDE= -I./src -I/usr/local/include/thrift
 LIB_DIR= -L/usr/local/lib -L/usr/lib
