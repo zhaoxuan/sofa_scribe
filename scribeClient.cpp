@@ -49,19 +49,19 @@ int main(){
   Annotation annotation_cs;
   annotation_cs.timestamp = (long)timestamp();
   annotation_cs.value = zipkinCoreConstants().CLIENT_SEND;
-  annotation_cs.host = endpoint;
+  annotation_cs.__set_host(endpoint);
 
   Annotation annotation_cr;
   annotation_cr.timestamp = (long)timestamp();
   annotation_cr.value = zipkinCoreConstants().CLIENT_RECV;
-  annotation_cr.host = endpoint;
+  annotation_cr.__set_host(endpoint);
 
   /*
    * Span is one RPC call
-   * trace_id is global unique id
+   * trace_id is global unique id for all spans
    *     uniq_id() is a function to generate uuid in formatters.h
    * name is RPC name
-   * id is current machine unique id
+   * id is current machine unique id for this span
    * annotations is array<Annotation>
    * binary_annotations is array<binary_annotations>
    */
