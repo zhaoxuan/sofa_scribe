@@ -28,5 +28,13 @@ Run sofa scribe demo
 --------------------
 
     make
-    ./main
+    ./main 117.185.16.31 9410
+    
+117.185.16.31:9410 is our online zipkin server.
+
+For debug
+---------
+
+    make debug
+    gdb main 117.185.16.31 9410
     
