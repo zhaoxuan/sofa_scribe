@@ -20,3 +20,6 @@ GENCPP= src/scribe_types.cpp \
 
 default:
 	$(CC) $(CXXFLAGS) -o main $(INCLUDE) $(LIB_DIR) $(LIBS) $(SOURCE) $(GENCPP)
+
+debug:
+	$(CC) -g $(CXXFLAGS) -o main $(INCLUDE) $(LIB_DIR) $(LIBS) $(SOURCE) $(GENCPP)
