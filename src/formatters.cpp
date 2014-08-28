@@ -22,9 +22,13 @@ using namespace std;
 //using namespace apache::thrift::protocol; 
 
 int ipv4_to_long(string ip) {
-  in_addr addr;
-  inet_aton(ip.c_str(), &addr);
-  return addr.s_addr;
+  //in_addr addr;
+  //inet_aton(ip.c_str(), &addr);
+  //return addr.s_addr;
+  int a, b, c, d;
+  sscanf(ip.c_str(), "%d.%d.%d.%d", &a, &b, &c, &d);
+  long ip_long = ( a << 24 ) | ( b << 16 ) | ( c << 8 ) | d;
+  return ip_long;
 }
 
 long uniq_id() {
