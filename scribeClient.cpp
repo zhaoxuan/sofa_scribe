@@ -1,3 +1,10 @@
+/*
+ * scribeClient.cpp
+ * Copyright (C) 2014 john <john@apple.local>
+ *
+ * Distributed under terms of the MIT license.
+ */
+
 #include <iostream>
 #include <protocol/TBinaryProtocol.h>
 #include <transport/TSocket.h>
@@ -26,7 +33,15 @@ using namespace scribe::thrift;
   //s = trans->getBufferAsString();
 //}
 
-int main(){
+int main(int argc, char *argv[]){
+  if (argc != 3) {
+    printf("Pls use main ip port.\n");
+    printf("Like this: ./main 117.185.16.31 9410\n");
+    return 0;
+  }
+
+  string zipkin_ip = argv[1];
+  int zipkin_port = atoi(argv[2]);
 
   /*
    * Endpoint is current machine ip and port and service_name
@@ -101,7 +116,7 @@ int main(){
    * Open socket, connect to zipkin server
    * Use BinaryProtocol to send data
    */
-  boost::shared_ptr<TSocket> socket(new TSocket("127.0.0.1", 9410));
+  boost::shared_ptr<TSocket> socket(new TSocket(zipkin_ip, zipkin_port));
   boost::shared_ptr<TFramedTransport> transport(new TFramedTransport(socket));
   boost::shared_ptr<TProtocol> protocol(new TBinaryProtocol(transport));
 
